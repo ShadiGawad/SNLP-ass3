@@ -14,8 +14,10 @@ pin = "4135991"
 auth = OAuthHandler(cKey, cSecret)
 auth.set_access_token(aToken, aSecret)
 api = API(auth)
+
+
 ids = []
-column=['language','ID',]
+column=['language','ID','text']
 
 def main():
     files = argv[1:]
@@ -28,10 +30,11 @@ def main():
             ids.append(line.strip())
 
             for id in ids:
+
                 tweet = api.get_status(id)
 
-
-
+                writer = csv.DictWriter(csvfile, fieldnames= column)
+                writer.writerow({'language': file[:3], 'ID': id, 'text': tweet.text})
 
 
 if __name__ == '__main__':
