@@ -17,25 +17,30 @@ auth.set_access_token(aToken, aSecret)
 api = API(auth)
 
 fieldnames =  ['language','ID','text']
-ids = []
+
 
 def main():
     files = argv[1:]
     csvfile = open('tweet-corpus.csv','w')
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
 
     for file in files:
+        ids = []
         data = open(file,'r')
         for line in data:
             ids.append(line.strip())
-            for id in ids:
-               try:
-                tweet = api.get_status(id)
 
+        for id in ids:
+            try:
+                tweet = api.get_status(id)
                 print(tweet.text)
-                writer = csv.DictWriter(csvfile, fieldnames= fieldnames)
                 writer.writerow({'language': file[:3], 'ID': id, 'text': tweet.text.encode('utf-8')})
-               except:
-                   pass
+
+            except:
+                print("-------tweet was deleted-------")
+                pass
+
 
 
 if __name__ == '__main__':
