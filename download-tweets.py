@@ -5,8 +5,8 @@ from tweepy import API
 import csv
 
 
-cKey= "CG6yV4x3jeTff2I49DjjJHrSQ"
-cSecret= "Xd94kql1mlIyxT1kqeUGTXP7PbylBZMunsZIjeVU6xGSpPkVyG"
+cKey= "8uDqFccWC99TpW6baa7N2SPDo"
+cSecret= "bpI8Gm64AeaE9PLUj545nzHto0gaeEPkdZhv2PhedVo1eqZEsE"
 aToken= "950698276143026176-tsM24sGDO8S94tME52g2ySEa47Ne8PR"
 aSecret= "xpRvwgpVNJ16yiyjaBsGbKpzndCz59nzjCjUaW1ovqfW2"
 pin = "4135991"
