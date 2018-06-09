@@ -1,39 +1,36 @@
 import csv
-from scipy import sparse
+from scipy.sparse import csr_matrix
 import numpy
 from collections import Counter
 
-def featureExtraction(tuple):
+def get_bigrams(s):
+    return [s[i:i+2] for i in range(len(s)-1)]
 
-    texts = []
-    id = []
-    languages = []
-    with open("tweet-corpus.csv") as csvfile:
-        readCSV = csv.reader(csvfile, delimiter = ",")
-        next(readCSV, None)
+counts = []
+languages = []
+bigrams=set()
 
-        for row in readCSV:
-            languages.append(row[0])
-            id.append(row[1])
-            texts.append(row[2])
+with open("tweet-corpus.csv") as csvfile:
+    readCSV = csv.reader(csvfile, delimiter = ",")
+    next(readCSV, None)
 
-    print(languages)
-    print(id)
-    print(texts)
+    for row in readCSV:
+        languages.append(row[0])
+        c = Counter(get_bigrams(row[2]))
+        counts.append(c)
+        bigrams |= set(c.keys())
 
-    bigrams=[]
-    for text in texts:
-        for i in range(len(text)-1):
-            bigrams.append(text[i:i+2])
+bigrams = sorted(bigrams)
 
-    print(bigrams)
+matrixRows = len(counts)
+matrixColumns = len(bigrams)
 
+matrix = numpy.zeros((matrixRows, matrixColumns))
 
-    def countBigrams(numberBigrams=[],bi = bigrams):
-        numberBigrams = Counter(bigrams)
-        return numberBigrams
+for i,t in enumerate(counts):
+    for k,v in t.most_common():
+        j = bigrams.index(k)
+        matrix[i,j] = v
 
-    print(countBigrams())
-
-
-featureExtraction(tuple)
+for i,t in zip(matrix,languages):
+    print (t, i)
