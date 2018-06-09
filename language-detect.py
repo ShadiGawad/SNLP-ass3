@@ -25,22 +25,23 @@ bigrams = sorted(bigrams)
 
 matrixRows = len(counts)
 matrixColumns = len(bigrams)
-print(matrixColumns)
-print(matrixRows)
 matrix = numpy.zeros((matrixRows, matrixColumns))
+
+print(matrix)
 
 for i,t in enumerate(counts):
     for k,v in t.most_common():
         j = bigrams.index(k)
         matrix[i,j] = v
 
-for i,t in zip(matrix,languages):
-    print (t, i)
 
-y_train = matrix
-x_train = numpy.array(languages).reshape(-1,1)
+y = matrix
 
-print(x_train)
+x = numpy.array(languages).reshape(len(languages),1)
+
+print(x)
+
 model = linear_model.LinearRegression()
-model.fit(x_train,y_train)
+model.fit(x,y)
+model.score()
 
