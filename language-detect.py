@@ -35,13 +35,7 @@ for i,t in enumerate(counts):
         matrix[i,j] = v
 
 
-y = matrix
-
-x = numpy.array(languages).reshape(len(languages),1)
-
-print(x)
-
 model = linear_model.LinearRegression()
-model.fit(x,y)
+model.fit(matrix,languages)
 model.score()
 
