@@ -18,7 +18,7 @@ api = API(auth)
 
 fieldnames =  ['language','ID','text']
 
-
+#Exercise 1
 def main():
     files = argv[1:]
     csvfile = open('tweet-corpus.csv','w')

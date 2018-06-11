@@ -4,6 +4,8 @@ import numpy
 from collections import Counter
 from sklearn import linear_model
 
+
+#Exercise 2
 def get_bigrams(s):
     return [s[i:i+2] for i in range(len(s)-1)]
 
@@ -34,8 +36,12 @@ for i,t in enumerate(counts):
         j = bigrams.index(k)
         matrix[i,j] = v
 
+#Exercise 3
+def get_score(score=0):
+    model = linear_model.LogisticRegression()
+    model.fit(matrix,languages)
+    score=model.score(matrix,languages)
+    return score
 
-model = linear_model.LinearRegression()
-model.fit(matrix,languages)
-model.score()
+print("Score of the model:", get_score())
 
