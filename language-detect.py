@@ -6,6 +6,15 @@ from sklearn import linear_model
 
 
 #Exercise 2
+
+def get_lables(file, lables=[]):
+    with open(file) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter= ",")
+        next(readCSV, None)
+        for row in readCSV:
+            lables.append(row[0])
+        return lables
+
 def get_bigrams(s):
     return [s[i:i+2] for i in range(len(s)-1)]
 
@@ -16,9 +25,8 @@ bigrams=set()
 with open("tweet-corpus.csv") as csvfile:
     readCSV = csv.reader(csvfile, delimiter = ",")
     next(readCSV, None)
-
+    languages = get_lables("tweet-corpus.csv")
     for row in readCSV:
-        languages.append(row[0])
         c = Counter(get_bigrams(row[2]))
         counts.append(c)
         bigrams |= set(c.keys())
@@ -44,4 +52,34 @@ def get_score(score=0):
     return score
 
 print("Score of the model:", get_score())
+
+
+#Exercise 4
+def precision(list1, list2, stringCheck):
+    TP = 0
+    FP = 0
+    for i,j in zip(list1,list2):
+        if i is j is stringCheck:
+            TP += 1
+        elif j is stringCheck and i is not stringCheck:
+            FP += 1
+    return TP / TP + FP
+
+
+
+def recall(list1, list2, stringCheck):
+    TP = 0
+    FN = 0
+    for i,j in zip(list1,list2):
+        if i is j is stringCheck:
+            TP += 1
+        elif i is stringCheck and j is not stringCheck:
+            FN += 1
+    return TP / TP + FN
+
+
+def f1(list1, list2, stringCheck):
+    p = precision(list1, list2, stringCheck)
+    r = recall(list1, list2, stringCheck)
+    return 2 * p * r / p + r
 
