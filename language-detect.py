@@ -45,14 +45,10 @@ for i,t in enumerate(counts):
         matrix[i,j] = v
 
 #Exercise 3
-def get_score(score=0):
-    model = linear_model.LogisticRegression()
-    model.fit(matrix,languages)
-    score=model.score(matrix,languages)
-    return score
-
-print("Score of the model:", get_score())
-
+model = linear_model.LogisticRegression()
+model.fit(matrix,languages)
+score=model.score(matrix,languages)
+print(score)
 
 #Exercise 4
 def precision(list1, list2, stringCheck):
@@ -83,3 +79,14 @@ def f1(list1, list2, stringCheck):
     r = recall(list1, list2, stringCheck)
     return 2 * p * r / p + r
 
+def kfolt(data):
+    partition = len(data) / 5
+    for i in range(4):
+        l1 = data[:(partition * i)]
+        l2 = data[partition * i:]
+    print(len(data))
+    print(len(l1))
+    print(len(l2))
+    return l1,l2
+
+print(kfolt(matrix))
