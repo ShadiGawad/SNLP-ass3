@@ -6,7 +6,7 @@ from sklearn import linear_model
 
 
 #Exercise 2
-
+#method to read the lables of the csv file
 def get_lables(file, lables=[]):
     with open(file) as csvfile:
         readCSV = csv.reader(csvfile, delimiter= ",")
@@ -15,16 +15,19 @@ def get_lables(file, lables=[]):
             lables.append(row[0])
         return lables
 
+#returns all the bigrams of a string
 def get_bigrams(s):
     return [s[i:i+2] for i in range(len(s)-1)]
 
+#set up counts list, languages for all lables and a set of all bigrams
 counts = []
 languages = []
 bigrams=set()
 
+#read the csv file
 with open("tweet-corpus.csv") as csvfile:
     readCSV = csv.reader(csvfile, delimiter = ",")
-    next(readCSV, None)
+    next(readCSV, None)                             #skip header
     languages = get_lables("tweet-corpus.csv")
     for row in readCSV:
         c = Counter(get_bigrams(row[2]))
@@ -37,6 +40,7 @@ matrixRows = len(counts)
 matrixColumns = len(bigrams)
 matrix = numpy.zeros((matrixRows, matrixColumns))
 
+print("Ex2 matrix")
 print(matrix)
 
 for i,t in enumerate(counts):
@@ -52,7 +56,7 @@ def logisticRegressionTrainer(matrix, lables, c):
 
 
 score= logisticRegressionTrainer(matrix,languages,1.0).score(matrix,languages)
-print(score)
+print("Ex3 score:",score)
 
 #Exercise 4
 
@@ -63,11 +67,13 @@ def precision(list1, list2, stringCheck):
     TP = 0
     FP = 0
     for i,j in zip(list1,list2):
-        if i is stringCheck:
-            if j is stringCheck:
-                TP += 1
+        if i and j is stringCheck:
+            TP += 1
         elif j is stringCheck and i is not stringCheck:
             FP += 1
+
+    if TP is 0:
+        TP = 1
     return TP / TP + FP
 
 
@@ -76,10 +82,13 @@ def recall(list1, list2, stringCheck):
     TP = 0
     FN = 0
     for i,j in zip(list1,list2):
-        if i is j is stringCheck:
+        if i and j is stringCheck:
             TP += 1
         elif i is stringCheck and j is not stringCheck:
             FN += 1
+
+    if TP is 0:
+        TP = 1
     return TP / TP + FN
 
 
@@ -87,6 +96,7 @@ def f1(list1, list2, stringCheck):
     p = precision(list1, list2, stringCheck)
     r = recall(list1, list2, stringCheck)
     return 2 * p * r / p + r
+
 
 def macro(prediction, langList):
     langListUnique = list(set(langList))
@@ -105,8 +115,9 @@ def macro(prediction, langList):
 
     return macro_precision, macro_recall, macro_f1
 
-print("Macro average precision, recall and f1:", macro(predictions, languages))
+print("Ex4: Macro average precision, recall and f1:", macro(predictions, languages))
 
+#Exercise 5
 
 def kfold(data,lables,k,c):
     partition = int(len(data) / k)
@@ -139,18 +150,18 @@ def kfold(data,lables,k,c):
         kFoldPrediction = kFoldModel.predict(testData)
         mP, mR, mF = macro(kFoldPrediction, testLables)
 
-        macroPrecision.append(mP)
-        macroRecall.append(mR)
-        macroF1.append(mF)
+    macroPrecision.append(mP)
+    macroRecall.append(mR)
+    macroF1.append(mF)
     mpMean = numpy.mean(macroPrecision)
     mrMean = numpy.mean(macroRecall)
     mf1Mean = numpy.mean(macroF1)
 
-    print("Mean of Macro Precision, Recall and F1: ", mpMean, mrMean, mf1Mean)
+    print("Ex5: Mean of Macro Precision, Recall and F1: ", mpMean, mrMean, mf1Mean)
 
     return mpMean,mrMean,mf1Mean
 
-kfold(matrix,languages, 5)
+kfold(matrix,languages, 5,1.0)
 
 def maxF (data):
     result = [0,0,0,0]
@@ -178,7 +189,7 @@ while hyper < 2.0:
     hPrecision, hRecall, hF1 = kfold(matrix, languages,5,hyper)
     result.append([hyper,hPrecision,hRecall,hF1])
 
-    improvedModel = linear_model.LogisticRegression(penalty='12', C=hyper)
+    improvedModel = linear_model.LogisticRegression( C=hyper)
     fitImprovedModel= improvedModel.fit(matrix,languages)
     prediction = fitImprovedModel.predict(matrix)
     precisionImproved, recallImproved, fImproved = macro(prediction,languages)
