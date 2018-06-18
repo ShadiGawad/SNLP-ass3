@@ -62,41 +62,25 @@ print("Ex3 score:",score)
 
 predictions = logisticRegressionTrainer(matrix,languages,1.0).predict(matrix)
 
-
-def precision(list1, list2, stringCheck):
+def prf(gold, pred, stringCheck):
     TP = 0
     FP = 0
-    for i,j in zip(list1,list2):
-        if i and j is stringCheck:
+    FN = 0
+    for i,j in zip(gold,pred):
+        if i == stringCheck and j == stringCheck:
             TP += 1
-        elif j is stringCheck and i is not stringCheck:
+        elif j == stringCheck and i != stringCheck:
+            FP += 1
+        elif i == stringCheck and j != stringCheck:
             FP += 1
 
-    if TP is 0:
-        TP = 1
-    return TP / TP + FP
+        if TP == 0:
+            TP = 1
+    precision = (TP / (TP + FP))
+    recall = (TP / (TP + FN))
+    f1 = (2* precision * recall)/(precision + recall)
 
-
-
-def recall(list1, list2, stringCheck):
-    TP = 0
-    FN = 0
-    for i,j in zip(list1,list2):
-        if i and j is stringCheck:
-            TP += 1
-        elif i is stringCheck and j is not stringCheck:
-            FN += 1
-
-    if TP is 0:
-        TP = 1
-    return TP / TP + FN
-
-
-def f1(list1, list2, stringCheck):
-    p = precision(list1, list2, stringCheck)
-    r = recall(list1, list2, stringCheck)
-    return 2 * p * r / p + r
-
+    return precision, recall, f1
 
 def macro(prediction, langList):
     langListUnique = list(set(langList))
@@ -106,8 +90,9 @@ def macro(prediction, langList):
     sumRecall = 0
 
     for langString in langListUnique:
-        sumPrecision += precision(languages, prediction, langString)
-        sumRecall += recall(languages, prediction, langString)
+        p,r,f = prf(languages,prediction,langString)
+        sumPrecision += p
+        sumRecall += r
 
     macro_precision = sumPrecision / c
     macro_recall = sumRecall / c
@@ -157,11 +142,9 @@ def kfold(data,lables,k,c):
     mrMean = numpy.mean(macroRecall)
     mf1Mean = numpy.mean(macroF1)
 
-    print("Ex5: Mean of Macro Precision, Recall and F1: ", mpMean, mrMean, mf1Mean)
-
     return mpMean,mrMean,mf1Mean
 
-kfold(matrix,languages, 5,1.0)
+print("Ex5: Mean of Macro Precision, Recall and F1: ", kfold(matrix,languages, 5,1.0))
 
 def maxF (data):
     result = [0,0,0,0]
@@ -200,3 +183,4 @@ no_k_fold = maxF(result2)
 
 print("Ex6 with kfold: Hyper_Parameter, Macro precision, Macro Recall, Macro F1:", data)
 print("Ex6 without kfold: Hyper_Parameter, Macro precision, Macro Recall, Macro F1:", no_k_fold)
+
