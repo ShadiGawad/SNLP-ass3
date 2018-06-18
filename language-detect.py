@@ -45,18 +45,27 @@ for i,t in enumerate(counts):
         matrix[i,j] = v
 
 #Exercise 3
-model = linear_model.LogisticRegression()
-model.fit(matrix,languages)
-score=model.score(matrix,languages)
+def logisticRegressionTrainer(matrix, lables, c):
+    model = linear_model.LogisticRegression(C=c)
+    model.fit(matrix, lables)
+    return model
+
+
+score= logisticRegressionTrainer(matrix,languages,1.0).score(matrix,languages)
 print(score)
 
 #Exercise 4
+
+predictions = logisticRegressionTrainer(matrix,languages,1.0).predict(matrix)
+
+
 def precision(list1, list2, stringCheck):
     TP = 0
     FP = 0
     for i,j in zip(list1,list2):
-        if i is j is stringCheck:
-            TP += 1
+        if i is stringCheck:
+            if j is stringCheck:
+                TP += 1
         elif j is stringCheck and i is not stringCheck:
             FP += 1
     return TP / TP + FP
@@ -79,14 +88,104 @@ def f1(list1, list2, stringCheck):
     r = recall(list1, list2, stringCheck)
     return 2 * p * r / p + r
 
-def kfolt(data):
-    partition = len(data) / 5
-    for i in range(4):
-        l1 = data[:(partition * i)]
-        l2 = data[partition * i:]
-    print(len(data))
-    print(len(l1))
-    print(len(l2))
-    return l1,l2
+def macro(prediction, langList):
+    langListUnique = list(set(langList))
+    c = len(langListUnique)
 
-print(kfolt(matrix))
+    sumPrecision = 0
+    sumRecall = 0
+
+    for langString in langListUnique:
+        sumPrecision += precision(languages, prediction, langString)
+        sumRecall += recall(languages, prediction, langString)
+
+    macro_precision = sumPrecision / c
+    macro_recall = sumRecall / c
+    macro_f1 = 2 * macro_precision * macro_recall / (macro_precision + macro_recall)
+
+    return macro_precision, macro_recall, macro_f1
+
+print("Macro average precision, recall and f1:", macro(predictions, languages))
+
+
+def kfold(data,lables,k,c):
+    partition = int(len(data) / k)
+    start = 0
+
+    randomizer = numpy.random.permutation(len(data))
+    random_data = data[randomizer]
+    random_lables = numpy.array(lables)
+    random_lables = random_lables[randomizer]
+
+
+    macroPrecision = []
+    macroRecall = []
+    macroF1 = []
+
+    for i in range(k):
+        if(len(random_data) - start) <= partition:
+            testData = random_data[start:]
+            testLables = random_lables[start:]
+            trainingData = numpy.delete(random_data, numpy.s_[start:],axis = 0)
+            trainingLables = numpy.delete(random_lables, numpy.s_[start:])
+        else:
+            testData = random_data[start:(start+partition)]
+            testLables = random_lables[start:(start+partition)]
+            trainingData = numpy.delete(random_data,numpy.s_[start:(start+partition)],axis=0)
+            trainingLables = numpy.delete(random_lables, numpy.s_[start:(start+partition)])
+            start = partition
+
+        kFoldModel = logisticRegressionTrainer(trainingData, trainingLables,c)
+        kFoldPrediction = kFoldModel.predict(testData)
+        mP, mR, mF = macro(kFoldPrediction, testLables)
+
+        macroPrecision.append(mP)
+        macroRecall.append(mR)
+        macroF1.append(mF)
+    mpMean = numpy.mean(macroPrecision)
+    mrMean = numpy.mean(macroRecall)
+    mf1Mean = numpy.mean(macroF1)
+
+    print("Mean of Macro Precision, Recall and F1: ", mpMean, mrMean, mf1Mean)
+
+    return mpMean,mrMean,mf1Mean
+
+kfold(matrix,languages, 5)
+
+def maxF (data):
+    result = [0,0,0,0]
+
+    for item in data:
+        if result[3] <= item[3]:
+            result[0] = item[0]
+            result[1] = item[1]
+            result[2] = item[2]
+            result[3] = item[3]
+
+    return result
+
+#Exercise 6.
+
+hyper = 0.0
+result = []
+result2 = []
+data = []
+no_k_fold =[]
+
+while hyper < 2.0:
+    hyper += 0.5
+
+    hPrecision, hRecall, hF1 = kfold(matrix, languages,5,hyper)
+    result.append([hyper,hPrecision,hRecall,hF1])
+
+    improvedModel = linear_model.LogisticRegression(penalty='12', C=hyper)
+    fitImprovedModel= improvedModel.fit(matrix,languages)
+    prediction = fitImprovedModel.predict(matrix)
+    precisionImproved, recallImproved, fImproved = macro(prediction,languages)
+    result2.append([hyper, precisionImproved, recallImproved,fImproved])
+
+data = maxF(result)
+no_k_fold = maxF(result2)
+
+print("Ex6 with kfold: Hyper_Parameter, Macro precision, Macro Recall, Macro F1:", data)
+print("Ex6 without kfold: Hyper_Parameter, Macro precision, Macro Recall, Macro F1:", no_k_fold)
